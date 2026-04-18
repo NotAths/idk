@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chess — The Royal Game</title>
+<link rel="stylesheet" href="chess_css.css">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@100;300;400&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">Chess <span>♟</span></a>
+  <ul class="nav-links">
+    <li><a href="#history">History</a></li>
+    <li><a href="#pieces">Pieces</a></li>
+    <li><a href="#rules">Rules</a></li>
+    <li><a href="#openings">Openings</a></li>
+    <li><a href="#legends">Legends</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ul>
+  <button class="hamburger" id="ham" aria-label="Menu"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#history" onclick="closeMobile()">History</a>
+  <a href="#pieces" onclick="closeMobile()">Pieces</a>
+  <a href="#rules" onclick="closeMobile()">Rules</a>
+  <a href="#openings" onclick="closeMobile()">Openings</a>
+  <a href="#legends" onclick="closeMobile()">Legends</a>
+  <a href="#quiz" onclick="closeMobile()">Quiz</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">History · Strategy · Mastery</div>
+    <h1 class="hero-title">The<br><em>Royal Game</em><br>of Chess</h1>
+    <p class="hero-subtitle">A deep exploration of chess — its ancient origins, strategic principles, iconic openings, and the grandmasters who shaped the modern game.</p>
+    <div class="hero-meta">
+      <div class="meta-item"><span class="meta-label">Invented</span><span class="meta-value">~500 AD India</span></div>
+      <div class="divider-v"></div>
+      <div class="meta-item"><span class="meta-label">Origin</span><span class="meta-value">~6th Century AD</span></div>
+      <div class="divider-v"></div>
+      <div class="meta-item"><span class="meta-label">Players</span><span class="meta-value">800M+ Worldwide</span></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="board-wrap">
+      <!-- Bot nameplate (top = Black side) -->
+      <div class="player-strip bot-strip" id="botStrip">
+        <div class="player-info">
+          <div class="player-avatar bot-av">♟</div>
+          <div>
+            <div class="player-name" id="botNameLabel">— Bot —</div>
+            <div class="player-side">Playing Black</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="player-thinking" id="botThinkingDots">
+            <div class="dot-bounce"></div>
+            <div class="dot-bounce"></div>
+            <div class="dot-bounce"></div>
+          </div>
+          <div class="player-active-dot" id="botActiveDot"></div>
+        </div>
+      </div>
+
+      <div class="board-container">
+        <div class="coord-row" id="filesTop"></div>
+        <div class="board-with-ranks">
+          <div class="rank-labels" id="ranksLeft"></div>
+          <div class="chess-board" id="board"></div>
+          <div class="rank-labels" id="ranksRight"></div>
+        </div>
+        <div class="coord-row" id="filesBottom"></div>
+      </div>
+
+      <!-- Human nameplate (bottom = White side) -->
+      <div class="player-strip" id="humanStrip">
+        <div class="player-info">
+          <div class="player-avatar human-av">♙</div>
+          <div>
+            <div class="player-name">You</div>
+            <div class="player-side">Playing White</div>
+          </div>
+        </div>
+        <div class="player-active-dot" id="humanActiveDot" style="opacity:1"></div>
+      </div>
+
+      <div class="board-status" id="boardStatus">White to move · Tap a piece to start</div>
+
+      <!-- Bot control panel -->
+      <div class="bot-panel">
+        <div class="bot-header">
+          <div class="bot-label-group">
+            <div class="bot-icon-badge">🤖</div>
+            <div>
+              <div class="bot-title">Chess Bot</div>
+              <div class="bot-subtitle" id="botSubtitle">Toggle to enable</div>
+            </div>
+          </div>
+          <label class="bot-toggle" title="Enable/disable bot">
+            <input type="checkbox" id="botToggle" onchange="onBotToggle()">
+            <div class="bot-toggle-track"></div>
+            <div class="bot-toggle-thumb"></div>
+          </label>
+        </div>
+
+        <!-- Difficulty section (slides open) -->
+        <div class="diff-section" id="diffSection">
+          <div class="diff-top">
+            <span class="diff-label-text">Difficulty</span>
+            <span class="diff-badge" id="diffName">Intermediate</span>
+          </div>
+          <input class="diff-slider" type="range" id="diffSlider" min="1" max="5" value="3" step="1" oninput="onDiffChange(this)">
+          <div class="diff-pips" id="diffPips"></div>
+          <div class="diff-desc" id="diffDesc">Plays solid moves, occasionally misses tactics</div>
+        </div>
+      </div>
+
+      <div class="board-btns">
+        <button class="board-btn" onclick="resetBoard()">↺ Reset</button>
+        <button class="board-btn" onclick="flipBoard()">⇅ Flip</button>
+        <button class="board-btn" onclick="undoMove()">← Undo</button>
+      </div>
+      <div class="move-log" id="moveLog"></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+</section>
+
+<!-- QUOTE -->
+<div class="quote-section">
+  <span class="quote-mark">"</span>
+  <p class="quote-text">Chess is not merely a game. It is a mirror — one that reflects the complexity of the human mind, the weight of decisions, and the beauty of pure thought in motion.</p>
+  <div class="quote-author">— Garry Kasparov, World Chess Champion</div>
+</div>
+
+<!-- HISTORY -->
+<section class="history-section" id="history">
+  <div class="section-header">
+    <span class="section-num">01</span><div class="gold-line"></div>
+    <h2 class="section-title">A <em>History</em> Spanning Centuries</h2>
+  </div>
+  <div class="history-grid">
+    <div class="history-text">
+      <p>Chess traces its origins to the ancient Indian game of <em>Chaturanga</em>, played around the 6th century AD, representing the four divisions of the Indian military — infantry, cavalry, elephants, and chariots.</p>
+      <p>Traveling westward through Persia (becoming <em>Chatrang</em>, then <em>Shatranj</em>), the game evolved dramatically. When Islamic civilization adopted it, chess flourished across the Arab world, eventually reaching Europe through Spain and Sicily.</p>
+      <p>The European Middle Ages transformed pieces to reflect feudal society — the Vizier became the Queen. By the 19th century, chess had standardized, and the first World Championship was held in 1886.</p>
+    </div>
+    <div>
+      <div class="timeline-item"><span class="timeline-year">~500 AD</span><div class="timeline-event"><strong>Chaturanga — India</strong>The earliest ancestor of chess, played on an 8×8 board called an ashtāpada.</div></div>
+      <div class="timeline-item"><span class="timeline-year">600 AD</span><div class="timeline-event"><strong>Shatranj — Persia</strong>"Checkmate" derives from Persian <em>Shāh Māt</em> — "the king is dead."</div></div>
+      <div class="timeline-item"><span class="timeline-year">1000 AD</span><div class="timeline-event"><strong>Arrival in Europe</strong>Moorish conquest brings chess to Europe; it spreads across the continent.</div></div>
+      <div class="timeline-item"><span class="timeline-year">1475</span><div class="timeline-event"><strong>Modern Rules Emerge</strong>The Queen gains full power. Chess becomes the modern game.</div></div>
+      <div class="timeline-item"><span class="timeline-year">1886</span><div class="timeline-event"><strong>First World Championship</strong>Wilhelm Steinitz defeats Zukertort — the first undisputed World Champion.</div></div>
+      <div class="timeline-item"><span class="timeline-year">1997</span><div class="timeline-event"><strong>Deep Blue vs. Kasparov</strong>IBM's computer defeats Kasparov — the first time a machine beat a world champion.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PIECES -->
+<section class="pieces-section" id="pieces">
+  <div class="section-header">
+    <span class="section-num">02</span><div class="gold-line"></div>
+    <h2 class="section-title">The <em>Pieces</em> <span class="section-hint">— tap to learn</span></h2>
+  </div>
+  <div class="pieces-grid" id="piecesGrid">
+    <div class="piece-card" data-piece="king" onclick="togglePiece('king',this)"><span class="piece-icon">♚</span><div class="piece-name">King</div><div class="piece-value">∞ Value</div></div>
+    <div class="piece-card" data-piece="queen" onclick="togglePiece('queen',this)"><span class="piece-icon">♛</span><div class="piece-name">Queen</div><div class="piece-value">~9 pts</div></div>
+    <div class="piece-card" data-piece="rook" onclick="togglePiece('rook',this)"><span class="piece-icon">♜</span><div class="piece-name">Rook</div><div class="piece-value">~5 pts</div></div>
+    <div class="piece-card" data-piece="bishop" onclick="togglePiece('bishop',this)"><span class="piece-icon">♝</span><div class="piece-name">Bishop</div><div class="piece-value">~3 pts</div></div>
+    <div class="piece-card" data-piece="knight" onclick="togglePiece('knight',this)"><span class="piece-icon">♞</span><div class="piece-name">Knight</div><div class="piece-value">~3 pts</div></div>
+    <div class="piece-card" data-piece="pawn" onclick="togglePiece('pawn',this)"><span class="piece-icon">♟</span><div class="piece-name">Pawn</div><div class="piece-value">1 pt</div></div>
+    <div class="piece-detail-panel" id="piecePanel"></div>
+  </div>
+</section>
+
+<!-- RULES -->
+<section class="rules-section" id="rules">
+  <div class="section-header">
+    <span class="section-num">03</span><div class="gold-line"></div>
+    <h2 class="section-title">Core <em>Rules</em> <span class="section-hint">— tap to expand</span></h2>
+  </div>
+  <div class="rules-grid">
+    <div class="rule-card" onclick="toggleRule(this)"><div class="rule-number">01</div><div class="rule-title">Check &amp; Checkmate</div><div class="rule-desc">A king in check must escape — checkmate ends the game.</div><div class="rule-extra">When attacked, the player must move the king, block the attack, or capture the attacker. If none is possible, it is checkmate and the game is over.</div></div>
+    <div class="rule-card" onclick="toggleRule(this)"><div class="rule-number">02</div><div class="rule-title">Stalemate</div><div class="rule-desc">No legal moves but not in check — an immediate draw.</div><div class="rule-extra">One of chess's most dramatic defensive resources — a losing player can sometimes force stalemate to escape defeat.</div></div>
+    <div class="rule-card" onclick="toggleRule(this)"><div class="rule-number">03</div><div class="rule-title">Castling</div><div class="rule-desc">King moves two squares; the rook jumps to the other side.</div><div class="rule-extra">Only legal if: neither piece has moved, no pieces are between them, and the king doesn't pass through check. Both kingside (0-0) and queenside (0-0-0) castling exist.</div></div>
+    <div class="rule-card" onclick="toggleRule(this)"><div class="rule-number">04</div><div class="rule-title">En Passant</div><div class="rule-desc">A special pawn capture — available only on the very next move.</div><div class="rule-extra">If a pawn advances two squares and lands beside an opponent's pawn, it may be captured as if it had moved only one. The right expires immediately if not used.</div></div>
+    <div class="rule-card" onclick="toggleRule(this)"><div class="rule-number">05</div><div class="rule-title">Promotion</div><div class="rule-desc">A pawn reaching the back rank promotes to any major piece.</div><div class="rule-extra">Promotion is mandatory — almost always to a Queen ("queening"), the most powerful piece. Promoting to a knight is called "underpromotion."</div></div>
+    <div class="rule-card" onclick="toggleRule(this)"><div class="rule-number">06</div><div class="rule-title">The 50-Move Rule</div><div class="rule-desc">Draw if no pawn move or capture in 50 moves each.</div><div class="rule-extra">Prevents endless prolonging of unwinnable positions. Either player may claim the draw once the condition is met.</div></div>
+  </div>
+</section>
+
+<!-- OPENINGS -->
+<section class="openings-section" id="openings">
+  <div class="section-header">
+    <span class="section-num">04</span><div class="gold-line"></div>
+    <h2 class="section-title">Famous <em>Openings</em> <span class="section-hint">— tap for details</span></h2>
+  </div>
+  <div class="openings-list" id="openingsList"></div>
+</section>
+
+<!-- LEGENDS -->
+<section class="legends-section" id="legends">
+  <div class="section-header">
+    <span class="section-num">05</span><div class="gold-line"></div>
+    <h2 class="section-title">The <em>Grandmasters</em></h2>
+  </div>
+  <div class="legends-scroll">
+    <div class="legend-card"><div class="legend-icon">♟</div><div class="legend-name">Paul Morphy</div><div class="legend-country">United States</div><div class="legend-years">1837–1884 · The Pride and Sorrow of Chess</div></div>
+    <div class="legend-card"><div class="legend-icon">♟</div><div class="legend-name">Wilhelm Steinitz</div><div class="legend-country">Austria–Hungary</div><div class="legend-years">1st World Champion · 1886–1894</div></div>
+    <div class="legend-card"><div class="legend-icon">♟</div><div class="legend-name">José Capablanca</div><div class="legend-country">Cuba</div><div class="legend-years">3rd World Champion · 1921–1927</div></div>
+    <div class="legend-card"><div class="legend-icon">♟</div><div class="legend-name">Bobby Fischer</div><div class="legend-country">United States</div><div class="legend-years">11th World Champion · 1972–1975</div></div>
+    <div class="legend-card"><div class="legend-icon">♟</div><div class="legend-name">Garry Kasparov</div><div class="legend-country">Russia / Azerbaijan</div><div class="legend-years">13th World Champion · 1985–2000</div></div>
+    <div class="legend-card"><div class="legend-icon">♟</div><div class="legend-name">Anatoly Karpov</div><div class="legend-country">Soviet Union</div><div class="legend-years">12th World Champion · 1975–1985</div></div>
+    <div class="legend-card"><div class="legend-icon">♟</div><div class="legend-name">Magnus Carlsen</div><div class="legend-country">Norway</div><div class="legend-years">16th World Champion · 2013–2023</div></div>
+  </div>
+</section>
+
+<!-- NOTATION -->
+<section class="notation-section">
+  <div class="section-header">
+    <span class="section-num">06</span><div class="gold-line"></div>
+    <h2 class="section-title">Chess <em>Notation</em></h2>
+  </div>
+  <div class="notation-grid">
+    <div class="notation-intro">
+      <p>Algebraic notation is the standard system for recording chess moves. Each square is identified by a file letter (a–h) and rank number (1–8). Piece initials precede the destination square — pawns have no initial.</p>
+      <br>
+      <p>Special symbols: <em>+</em> check, <em>#</em> checkmate, <em>0-0</em> kingside castling, <em>0-0-0</em> queenside castling, <em>!</em> brilliant move, <em>?</em> mistake.</p>
+      <br>
+      <p>Below is the <em>Immortal Game</em> — Anderssen vs. Kieseritzky, London 1851 — considered the most brilliant attacking game ever played.</p>
+    </div>
+    <div class="pgn-box">
+      <span class="pgn-comment">[Event "London casual game"]</span><br>
+      <span class="pgn-comment">[Date "1851.06.21"]</span><br>
+      <span class="pgn-comment">[White "Anderssen, Adolf"]</span><br>
+      <span class="pgn-comment">[Black "Kieseritzky, Lionel"]</span><br><br>
+      1. e4 e5 2. f4 exf4 3. Bc4 Qh4+<br>
+      4. Kf1 b5 5. Bxb5 Nf6 6. Nf3 Qh6<br>
+      7. d3 Nh5 8. Nh4 Qg5 9. Nf5 c6<br>
+      10. g4 Nf6 11. Rg1! cxb5 12. h4!<br>
+      13. h5 Qg3 14. Bxf4 Qf3+ 15. Ke1<br>
+      Qxe4+ 16. Be2 Nxg4 17. Qd4! Nf2<br>
+      18. Qxa7! Nxh1 19. Qxb8+!! Kxb8<br>
+      20. Nd6++ Kc7 21. Bd8#!<br><br>
+      <span class="pgn-result">1-0 — The Immortal Game</span>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="quiz-section" id="quiz">
+  <div class="section-header">
+    <span class="section-num">07</span><div class="gold-line"></div>
+    <h2 class="section-title">Test Your <em>Knowledge</em></h2>
+  </div>
+  <div class="quiz-box">
+    <div class="quiz-progress" id="quizProgress"></div>
+    <div class="quiz-score" id="quizScore">Score: 0 / 0</div>
+    <div class="quiz-question" id="quizQ"></div>
+    <div class="quiz-options" id="quizOpts"></div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+    <button class="board-btn" id="quizNext" onclick="nextQuestion()" style="display:none">Next →</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Chess — <em>The Royal Game</em></div>
+  <div class="footer-meta">The Royal Game of Chess<br>An Interactive Guide<br>800 Million Players Worldwide</div>
+</footer>
+
+<!-- PROMOTION MODAL -->
+<div class="modal-overlay" id="promoModal">
+  <div class="modal-box">
+    <div class="modal-title">Promote Pawn to</div>
+    <div class="modal-pieces" id="promoChoices"></div>
+  </div>
+</div>
+
+<script>
+/* ── NAV ── */
+const ham=document.getElementById('ham'),mobileMenu=document.getElementById('mobileMenu');
+ham.addEventListener('click',()=>{ham.classList.toggle('open');mobileMenu.classList.toggle('open');document.body.style.overflow=mobileMenu.classList.contains('open')?'hidden':''});
+function closeMobile(){ham.classList.remove('open');mobileMenu.classList.remove('open');document.body.style.overflow=''}
+
+/* ══════════════════════════════════════
+   CHESS ENGINE
+══════════════════════════════════════ */
+const UNI={K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘',P:'♙',k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'};
+let G={},flipped=false;
+
+function initState(){
+  return{
+    board:[
+      ['r','n','b','q','k','b','n','r'],
+      ['p','p','p','p','p','p','p','p'],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      ['P','P','P','P','P','P','P','P'],
+      ['R','N','B','Q','K','B','N','R'],
+    ],
+    turn:'w',selected:null,legalMoves:[],
+    castling:{wK:true,wQR:true,wKR:true,bK:true,bQR:true,bKR:true},
+    enPassant:null,history:[],moveNotations:[],
+    status:'active',lastMove:null
+  };
+}
+G=initState();
+
+const isW=p=>p&&p===p.toUpperCase();
+const isB=p=>p&&p===p.toLowerCase();
+const inB=(r,c)=>r>=0&&r<8&&c>=0&&c<8;
+const cloneB=b=>b.map(r=>[...r]);
+const isFriend=(p,t)=>t==='w'?isW(p):isB(p);
+const isEnemy=(p,t)=>t==='w'?isB(p):isW(p);
+
+function getRaw(board,r,c,turn,ep,cas){
+  const p=board[r][c]; if(!p) return [];
+  const mv=[],pt=p.toLowerCase(),dir=turn==='w'?-1:1;
+  if(pt==='p'){
+    if(inB(r+dir,c)&&!board[r+dir][c]){
+      mv.push([r+dir,c,'n']);
+      const sr=turn==='w'?6:1;
+      if(r===sr&&!board[r+2*dir][c]) mv.push([r+2*dir,c,'d']);
+    }
+    for(const dc of[-1,1]){
+      if(!inB(r+dir,c+dc)) continue;
+      if(isEnemy(board[r+dir][c+dc],turn)) mv.push([r+dir,c+dc,'n']);
+      if(ep&&ep[0]===r+dir&&ep[1]===c+dc) mv.push([r+dir,c+dc,'ep']);
+    }
+  }else if(pt==='n'){
+    for(const[dr,dc]of[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]){
+      const nr=r+dr,nc=c+dc;
+      if(inB(nr,nc)&&!isFriend(board[nr][nc],turn)) mv.push([nr,nc,'n']);
+    }
+  }else if(pt==='k'){
+    for(const[dr,dc]of[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]){
+      const nr=r+dr,nc=c+dc;
+      if(inB(nr,nc)&&!isFriend(board[nr][nc],turn)) mv.push([nr,nc,'n']);
+    }
+    const row=turn==='w'?7:0;
+    if(r===row&&c===4){
+      const kk=turn==='w'?'wK':'bK',kr=turn==='w'?'wKR':'bKR',qr=turn==='w'?'wQR':'bQR';
+      if(cas[kk]){
+        if(cas[kr]&&!board[row][5]&&!board[row][6]) mv.push([row,6,'ck']);
+        if(cas[qr]&&!board[row][3]&&!board[row][2]&&!board[row][1]) mv.push([row,2,'cq']);
+      }
+    }
+  }else{
+    const rays={r:[[0,1],[0,-1],[1,0],[-1,0]],b:[[1,1],[1,-1],[-1,1],[-1,-1]],q:[[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]]}[pt];
+    for(const[dr,dc]of rays){
+      let nr=r+dr,nc=c+dc;
+      while(inB(nr,nc)){
+        if(isFriend(board[nr][nc],turn)) break;
+        mv.push([nr,nc,'n']);
+        if(board[nr][nc]) break;
+        nr+=dr;nc+=dc;
+      }
+    }
+  }
+  return mv;
+}
+
+function attacked(board,r,c,byColor){
+  for(let rr=0;rr<8;rr++) for(let cc=0;cc<8;cc++){
+    const p=board[rr][cc];if(!p) continue;
+    if(byColor==='w'&&!isW(p)) continue;
+    if(byColor==='b'&&!isB(p)) continue;
+    const mv=getRaw(board,rr,cc,byColor,null,{wK:false,bK:false,wQR:false,wKR:false,bQR:false,bKR:false});
+    if(mv.some(m=>m[0]===r&&m[1]===c)) return true;
+  }
+  return false;
+}
+
+function findKing(board,color){
+  const k=color==='w'?'K':'k';
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(board[r][c]===k) return[r,c];
+  return null;
+}
+
+function inCheck(board,color){
+  const k=findKing(board,color); if(!k) return false;
+  return attacked(board,k[0],k[1],color==='w'?'b':'w');
+}
+
+function getLegal(state,r,c){
+  const{board,turn,enPassant,castling}=state;
+  const p=board[r][c];
+  if(!p||(turn==='w'&&!isW(p))||(turn==='b'&&!isB(p))) return[];
+  const raw=getRaw(board,r,c,turn,enPassant,castling);
+  const legal=[];
+  for(const[nr,nc,type]of raw){
+    const row=turn==='w'?7:0,opp=turn==='w'?'b':'w';
+    if(type==='ck'){if(inCheck(board,turn)||attacked(board,row,5,opp)||attacked(board,row,6,opp)) continue}
+    if(type==='cq'){if(inCheck(board,turn)||attacked(board,row,3,opp)||attacked(board,row,2,opp)) continue}
+    const nb=cloneB(board);
+    nb[nr][nc]=p;nb[r][c]=null;
+    if(type==='ep') nb[r][nc]=null;
+    if(type==='ck'){nb[row][5]=nb[row][7];nb[row][7]=null}
+    if(type==='cq'){nb[row][3]=nb[row][0];nb[row][0]=null}
+    if(!inCheck(nb,turn)) legal.push([nr,nc,type]);
+  }
+  return legal;
+}
+
+function hasAny(state,color){
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const p=state.board[r][c];if(!p) continue;
+    if(color==='w'&&!isW(p)) continue;
+    if(color==='b'&&!isB(p)) continue;
+    if(getLegal(state,r,c).length>0) return true;
+  }
+  return false;
+}
+
+const f2l=c=>'abcdefgh'[c];
+const r2n=r=>(8-r).toString();
+const toAN=(r,c)=>f2l(c)+r2n(r);
+
+function applyMove(state,fr,fc,tr,tc,type,promo){
+  const s=JSON.parse(JSON.stringify(state));
+  const p=s.board[fr][fc],pt=p.toLowerCase();
+  const cap=s.board[tr][tc];
+  let not='';
+  s.lastMove=[fr,fc,tr,tc];
+  s.board[tr][tc]=p; s.board[fr][fc]=null;
+  if(type==='ep'){s.board[fr][tc]=null;not=f2l(fc)+'x'+toAN(tr,tc)}
+  s.enPassant=(pt==='p'&&Math.abs(tr-fr)===2)?[(fr+tr)/2,tc]:null;
+  if(type==='ck'){const row=s.turn==='w'?7:0;s.board[row][5]=s.board[row][7];s.board[row][7]=null;not='0-0'}
+  if(type==='cq'){const row=s.turn==='w'?7:0;s.board[row][3]=s.board[row][0];s.board[row][0]=null;not='0-0-0'}
+  if(pt==='k'){if(s.turn==='w'){s.castling.wK=s.castling.wKR=s.castling.wQR=false}else{s.castling.bK=s.castling.bKR=s.castling.bQR=false}}
+  if(pt==='r'){if(fr===7&&fc===7)s.castling.wKR=false;if(fr===7&&fc===0)s.castling.wQR=false;if(fr===0&&fc===7)s.castling.bKR=false;if(fr===0&&fc===0)s.castling.bQR=false}
+  if(pt==='p'&&(tr===0||tr===7)){const pc=promo||'Q';s.board[tr][tc]=s.turn==='w'?pc.toUpperCase():pc.toLowerCase();not=toAN(tr,tc)+'='+(pc.toUpperCase())}
+  if(!not){const pi=pt==='p'?'':(p.toUpperCase());not=pi+(cap||type==='ep'?f2l(fc)+'x':'')+toAN(tr,tc)}
+  s.turn=s.turn==='w'?'b':'w';
+  const ck=inCheck(s.board,s.turn),hm=hasAny(s,s.turn);
+  if(!hm){s.status=ck?'checkmate':'stalemate';not+=ck?'#':''}
+  else{s.status=ck?'check':'active';not+=ck?'+':''}
+  const mn=Math.ceil(s.moveNotations.length/2)+1;
+  const pref=s.turn==='b'?mn+'. ':'';
+  s.moveNotations.push(pref+not);
+  s.history.push({board:cloneB(state.board),turn:state.turn,castling:JSON.parse(JSON.stringify(state.castling)),enPassant:state.enPassant,status:state.status,lastMove:state.lastMove,moveNotations:[...state.moveNotations]});
+  s.selected=null;s.legalMoves=[];
+  return s;
+}
+
+/* ── RENDER ── */
+function renderCoords(){
+  const files=['a','b','c','d','e','f','g','h'];
+  const ranks=['8','7','6','5','4','3','2','1'];
+  const df=flipped?[...files].reverse():files;
+  const dr=flipped?[...ranks].reverse():ranks;
+  ['filesTop','filesBottom'].forEach(id=>{const el=document.getElementById(id);el.innerHTML='';df.forEach(f=>{const s=document.createElement('span');s.textContent=f;el.appendChild(s)})});
+  ['ranksLeft','ranksRight'].forEach(id=>{const el=document.getElementById(id);el.innerHTML='';dr.forEach(r=>{const s=document.createElement('span');s.textContent=r;el.appendChild(s)})});
+}
+
+function renderBoard(){
+  const boardEl=document.getElementById('board');
+  const cells=boardEl.querySelectorAll('.cell');
+  if(!cells.length){buildBoardDom();return}
+  renderCoords();
+  const{board,selected,legalMoves,lastMove,status,turn}=G;
+  const legalSet=new Set(legalMoves.map(m=>m[0]*8+m[1]));
+  const capSet=new Set(legalMoves.filter(m=>board[m[0]][m[1]]||m[2]==='ep').map(m=>m[0]*8+m[1]));
+  let ckIdx=-1;
+  if(status==='check'||status==='checkmate'){const k=findKing(board,turn);if(k) ckIdx=k[0]*8+k[1]}
+  cells.forEach((cell,i)=>{
+    const vi=flipped?63-i:i,r=Math.floor(vi/8),c=vi%8;
+    const p=board[r][c];
+    cell.dataset.r=r;cell.dataset.c=c;
+    cell.className='cell '+((r+c)%2===0?'light':'dark');
+    if(selected&&selected[0]===r&&selected[1]===c) cell.classList.add('selected');
+    if(legalSet.has(r*8+c)&&!capSet.has(r*8+c)) cell.classList.add('legal-move');
+    if(capSet.has(r*8+c)) cell.classList.add('legal-capture');
+    if(lastMove){
+      if(lastMove[0]===r&&lastMove[1]===c) cell.classList.add('last-move-from');
+      if(lastMove[2]===r&&lastMove[3]===c) cell.classList.add('last-move-to');
+    }
+    if(vi===ckIdx) cell.classList.add('check-king');
+    const ex=cell.querySelector('.piece-span');
+    if(p){if(!ex||ex.textContent!==UNI[p]) cell.innerHTML=`<span class="piece-span">${UNI[p]}</span>`}
+    else cell.innerHTML='';
+  });
+  const sEl=document.getElementById('boardStatus');
+  const tw=G.turn==='w'?'White':'Black';
+  if(status==='checkmate') sEl.textContent=`Checkmate! ${tw==='White'?'Black':'White'} wins 🎉`;
+  else if(status==='stalemate') sEl.textContent='Stalemate — Draw!';
+  else if(status==='check') sEl.textContent=`${tw} is in Check!`;
+  else sEl.textContent=`${tw} to move`;
+  updatePlayerDots&&updatePlayerDots();
+  const log=document.getElementById('moveLog');
+  log.innerHTML=G.moveNotations.map(m=>`<span>${m}</span>`).join(' ');
+  log.scrollLeft=log.scrollWidth;
+}
+
+function buildBoardDom(){
+  const boardEl=document.getElementById('board');
+  boardEl.innerHTML='';
+  for(let i=0;i<64;i++){
+    const cell=document.createElement('div');
+    const vi=flipped?63-i:i,r=Math.floor(vi/8),c=vi%8;
+    cell.className='cell '+((r+c)%2===0?'light':'dark');
+    cell.dataset.r=r;cell.dataset.c=c;
+    cell.addEventListener('click',onCellClick);
+    boardEl.appendChild(cell);
+  }
+  renderCoords();
+  renderBoard();
+}
+
+function onCellClick(e){
+  const cell=e.currentTarget;
+  const r=parseInt(cell.dataset.r),c=parseInt(cell.dataset.c);
+  const{board,turn,selected,legalMoves,status}=G;
+  if(status==='checkmate'||status==='stalemate') return;
+  // Block human clicks when it's bot's turn
+  if(botEnabled&&turn===botColor) return;
+  if(selected){
+    const move=legalMoves.find(m=>m[0]===r&&m[1]===c);
+    if(move){
+      const[tr,tc,type]=move,p=board[selected[0]][selected[1]];
+      const needsPro=p&&p.toLowerCase()==='p'&&(tr===0||tr===7);
+      if(needsPro){showPromo(selected[0],selected[1],tr,tc,type);return}
+      G=applyMove(G,selected[0],selected[1],tr,tc,type,null);
+      renderBoard();
+      maybeRunBot();
+      return;
+    }
+  }
+  const p=board[r][c];
+  if(p&&((turn==='w'&&isW(p))||(turn==='b'&&isB(p)))){
+    G.selected=[r,c];G.legalMoves=getLegal(G,r,c);
+  }else{G.selected=null;G.legalMoves=[]}
+  renderBoard();
+}
+
+function showPromo(fr,fc,tr,tc,type){
+  const turn=G.turn,modal=document.getElementById('promoModal'),ch=document.getElementById('promoChoices');
+  const opts=turn==='w'?['Q','R','B','N']:['q','r','b','n'];
+  ch.innerHTML='';
+  opts.forEach(pc=>{
+    const btn=document.createElement('div');
+    btn.className='modal-piece';btn.textContent=UNI[pc];
+    btn.addEventListener('click',()=>{
+      modal.classList.remove('open');
+      G=applyMove(G,fr,fc,tr,tc,type,pc);
+      renderBoard();
+      maybeRunBot();
+    });
+    ch.appendChild(btn);
+  });
+  modal.classList.add('open');
+}
+
+function resetBoard(){
+  botTimer&&clearTimeout(botTimer);botTimer=null;
+  G=initState();
+  setBotThinking&&setBotThinking(false);
+  buildBoardDom();
+  updatePlayerDots&&updatePlayerDots();
+}
+function flipBoard(){flipped=!flipped;buildBoardDom()}
+function undoMove(){
+  if(!G.history.length) return;
+  const undoCount = botEnabled ? 2 : 1;
+  for(let i=0;i<undoCount;i++){
+    if(!G.history.length) break;
+    const prev=G.history.pop();
+    G={...prev,history:G.history,legalMoves:[],selected:null};
+  }
+  botTimer&&clearTimeout(botTimer);botTimer=null;
+  setBotThinking&&setBotThinking(false);
+  renderBoard();
+  updatePlayerDots&&updatePlayerDots();
+}
+
+/* ══════════════════════════════════════════════════════════
+   CHESS BOT — MAIN-THREAD NEGAMAX ENGINE
+   No Worker, no external URLs. Runs synchronously in a
+   setTimeout so the UI can repaint the thinking indicator
+   before the search begins. Alpha-beta + quiescence search
+   + MVV-LVA ordering. Genuinely different per difficulty.
+══════════════════════════════════════════════════════════ */
+let botEnabled=false,botColor='b',botDepth=3,botTimer=null;
+
+const DIFF_CONFIG={
+  1:{name:'Beginner',     depth:1,noise:280,delay:400,  desc:'~600 ELO  · Moves randomly, lots of blunders'},
+  2:{name:'Easy',         depth:2,noise:110,delay:600,  desc:'~900 ELO  · Misses tactics, drops pieces'},
+  3:{name:'Intermediate', depth:3,noise:35, delay:900,  desc:'~1300 ELO · Solid play, occasional slip-ups'},
+  4:{name:'Advanced',     depth:4,noise:8,  delay:1400, desc:'~1700 ELO · Strong tactics, rarely blunders'},
+  5:{name:'Expert',       depth:5,noise:0,  delay:2000, desc:'~2000 ELO · Near-perfect, very hard to beat'}
+};
+
+/* ── ENGINE — piece values & PST ── */
+const ENG_PV={p:100,n:320,b:330,r:500,q:900,k:20000};
+const ENG_PST={
+  P:[0,0,0,0,0,0,0,0,50,50,50,50,50,50,50,50,10,10,20,30,30,20,10,10,5,5,10,25,25,10,5,5,0,0,0,20,20,0,0,0,5,-5,-10,0,0,-10,-5,5,5,10,10,-20,-20,10,10,5,0,0,0,0,0,0,0,0],
+  N:[-50,-40,-30,-30,-30,-30,-40,-50,-40,-20,0,0,0,0,-20,-40,-30,0,10,15,15,10,0,-30,-30,5,15,20,20,15,5,-30,-30,0,15,20,20,15,0,-30,-30,5,10,15,15,10,5,-30,-40,-20,0,5,5,0,-20,-40,-50,-40,-30,-30,-30,-30,-40,-50],
+  B:[-20,-10,-10,-10,-10,-10,-10,-20,-10,0,0,0,0,0,0,-10,-10,0,5,10,10,5,0,-10,-10,5,5,10,10,5,5,-10,-10,0,10,10,10,10,0,-10,-10,10,10,10,10,10,10,-10,-10,5,0,0,0,0,5,-10,-20,-10,-10,-10,-10,-10,-10,-20],
+  R:[0,0,0,0,0,0,0,0,5,10,10,10,10,10,10,5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,0,0,0,5,5,0,0,0],
+  Q:[-20,-10,-10,-5,-5,-10,-10,-20,-10,0,0,0,0,0,0,-10,-10,0,5,5,5,5,0,-10,-5,0,5,5,5,5,0,-5,0,0,5,5,5,5,0,-5,-10,5,5,5,5,5,0,-10,-10,0,5,0,0,0,0,-10,-20,-10,-10,-5,-5,-10,-10,-20],
+  K:[-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-20,-30,-30,-40,-40,-30,-30,-20,-10,-20,-20,-20,-20,-20,-20,-10,20,20,0,0,0,0,20,20,20,30,10,0,0,10,30,20]
+};
+
+function engPstIdx(r,c,white){return white?(r*8+c):((7-r)*8+c);}
+
+function engEval(board){
+  let s=0;
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const p=board[r][c];if(!p)continue;
+    const w=isW(p),pt=p.toUpperCase();
+    const v=(ENG_PV[p.toLowerCase()]||0)+(ENG_PST[pt]?ENG_PST[pt][engPstIdx(r,c,w)]:0);
+    s+=w?v:-v;
+  }
+  return s;
+}
+
+function engApply(board,cas,ep,turn,fr,fc,tr,tc,type,promo){
+  const nb=board.map(r=>[...r]),nc=Object.assign({},cas);
+  const p=nb[fr][fc],pt=p.toLowerCase();
+  nb[tr][tc]=p;nb[fr][fc]=null;
+  const ne=(pt==='p'&&Math.abs(tr-fr)===2)?[(fr+tr)/2,tc]:null;
+  if(type==='ep')nb[fr][tc]=null;
+  const row=turn==='w'?7:0;
+  if(type==='ck'){nb[row][5]=nb[row][7];nb[row][7]=null;}
+  if(type==='cq'){nb[row][3]=nb[row][0];nb[row][0]=null;}
+  if(pt==='k'){if(turn==='w'){nc.wK=nc.wKR=nc.wQR=false;}else{nc.bK=nc.bKR=nc.bQR=false;}}
+  if(pt==='r'){if(fr===7&&fc===7)nc.wKR=false;if(fr===7&&fc===0)nc.wQR=false;if(fr===0&&fc===7)nc.bKR=false;if(fr===0&&fc===0)nc.bQR=false;}
+  if(pt==='p'&&(tr===0||tr===7)){const pc=promo||'Q';nb[tr][tc]=turn==='w'?pc.toUpperCase():pc.toLowerCase();}
+  return[nb,nc,ne];
+}
+
+function mvvLva(board,mv){
+  const cap=board[mv.tr][mv.tc];
+  return cap?(ENG_PV[cap.toLowerCase()]||0)*10-(ENG_PV[(board[mv.fr][mv.fc]||'').toLowerCase()]||0):0;
+}
+
+/* Quiescence search — resolves captures only to avoid horizon effect */
+function quiesce(board,cas,ep,turn,alpha,beta){
+  const stand=(turn==='w'?1:-1)*engEval(board);
+  if(stand>=beta)return beta;
+  if(stand>alpha)alpha=stand;
+  // generate capture moves only using existing getLegal (reuses main engine)
+  const st={board,castling:cas,enPassant:ep,turn};
+  const allMvs=[];
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const p=board[r][c];if(!p)continue;
+    if(turn==='w'&&!isW(p))continue;
+    if(turn==='b'&&!isB(p))continue;
+    for(const[tr,tc,type] of getLegal(st,r,c)){
+      if(board[tr][tc]||type==='ep') allMvs.push({fr:r,fc:c,tr,tc,type});
+    }
+  }
+  allMvs.sort((a,b)=>mvvLva(board,b)-mvvLva(board,a));
+  const nt=turn==='w'?'b':'w';
+  for(const mv of allMvs){
+    const[nb,nc,ne]=engApply(board,cas,ep,turn,mv.fr,mv.fc,mv.tr,mv.tc,mv.type,'Q');
+    const sc=-quiesce(nb,nc,ne,nt,-beta,-alpha);
+    if(sc>=beta)return beta;
+    if(sc>alpha)alpha=sc;
+  }
+  return alpha;
+}
+
+/* Negamax alpha-beta */
+function negamax(board,cas,ep,turn,depth,alpha,beta){
+  if(depth===0)return quiesce(board,cas,ep,turn,alpha,beta);
+  const st={board,castling:cas,enPassant:ep,turn};
+  const allMvs=[];
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const p=board[r][c];if(!p)continue;
+    if(turn==='w'&&!isW(p))continue;
+    if(turn==='b'&&!isB(p))continue;
+    for(const[tr,tc,type] of getLegal(st,r,c)) allMvs.push({fr:r,fc:c,tr,tc,type});
+  }
+  if(!allMvs.length){return inCheck(board,turn)?(-30000+depth):0;}
+  allMvs.sort((a,b)=>mvvLva(board,b)-mvvLva(board,a));
+  const nt=turn==='w'?'b':'w';
+  for(const mv of allMvs){
+    const[nb,nc,ne]=engApply(board,cas,ep,turn,mv.fr,mv.fc,mv.tr,mv.tc,mv.type,'Q');
+    const sc=-negamax(nb,nc,ne,nt,depth-1,-beta,-alpha);
+    if(sc>=beta)return beta;
+    if(sc>alpha)alpha=sc;
+  }
+  return alpha;
+}
+
+/* Root search — returns best move object */
+function engBestMove(state,depth,noise){
+  const{board,castling:cas,enPassant:ep,turn}=state;
+  const allMvs=[];
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const p=board[r][c];if(!p)continue;
+    if(turn==='w'&&!isW(p))continue;
+    if(turn==='b'&&!isB(p))continue;
+    for(const[tr,tc,type] of getLegal(state,r,c)) allMvs.push({fr:r,fc:c,tr,tc,type});
+  }
+  if(!allMvs.length)return null;
+  allMvs.sort((a,b)=>mvvLva(board,b)-mvvLva(board,a));
+  const nt=turn==='w'?'b':'w';
+  let best=-Infinity,bestMv=allMvs[0];
+  for(const mv of allMvs){
+    const[nb,nc,ne]=engApply(board,cas,ep,turn,mv.fr,mv.fc,mv.tr,mv.tc,mv.type,'Q');
+    let sc=-negamax(nb,nc,ne,nt,depth-1,-Infinity,Infinity);
+    if(noise>0)sc+=(Math.random()*2-1)*noise;
+    if(sc>best){best=sc;bestMv=mv;}
+  }
+  return bestMv;
+}
+
+// Build difficulty pip UI
+(function buildPips(){
+  const container=document.getElementById('diffPips');
+  if(!container) return;
+  for(let i=1;i<=5;i++){
+    const pip=document.createElement('div');
+    pip.className='diff-pip'+(i===3?' active':'');
+    pip.innerHTML=`<div class="diff-pip-bar"></div><div class="diff-pip-label">${DIFF_CONFIG[i].name}</div>`;
+    pip.addEventListener('click',()=>{
+      document.getElementById('diffSlider').value=i;
+      onDiffChange(document.getElementById('diffSlider'));
+    });
+    container.appendChild(pip);
+  }
+  // init slider fill
+  const s=document.getElementById('diffSlider');
+  if(s) s.style.setProperty('--pct','50%');
+})();
+
+function onDiffChange(slider){
+  const v=parseInt(slider.value);
+  const pct=((v-1)/4*100).toFixed(0);
+  slider.style.setProperty('--pct',pct+'%');
+  botDepth=v; // store level index 1–5, not minimax depth
+  document.getElementById('diffName').textContent=DIFF_CONFIG[v].name;
+  document.getElementById('diffDesc').textContent=DIFF_CONFIG[v].desc;
+  document.querySelectorAll('.diff-pip').forEach((pip,idx)=>{
+    pip.classList.toggle('active',idx+1===v);
+  });
+  const sub=document.getElementById('botSubtitle');
+  if(sub&&botEnabled) sub.textContent=DIFF_CONFIG[v].name+' mode';
+}
+
+function setBotThinking(on){
+  document.querySelectorAll('.dot-bounce').forEach(d=>d.classList.toggle('active',on));
+  const sub=document.getElementById('botSubtitle');
+  if(!sub) return;
+  if(on){ sub.textContent='Calculating…'; return; }
+  const v=parseInt(document.getElementById('diffSlider').value)||3;
+  sub.textContent=botEnabled?DIFF_CONFIG[v].name+' mode':'Toggle to enable';
+}
+
+function updatePlayerDots(){
+  const humanDot=document.getElementById('humanActiveDot');
+  const botDot=document.getElementById('botActiveDot');
+  const status=G.status;
+  if(status==='checkmate'||status==='stalemate'){
+    humanDot&&humanDot.classList.remove('on');
+    botDot&&botDot.classList.remove('on');
+    return;
+  }
+  if(!botEnabled){
+    humanDot&&humanDot.classList.toggle('on',G.turn==='w');
+    botDot&&botDot.classList.remove('on');
+  }else{
+    humanDot&&humanDot.classList.toggle('on',G.turn==='w');
+    botDot&&botDot.classList.toggle('on',G.turn==='b');
+  }
+}
+
+function onBotToggle(){
+  botEnabled=document.getElementById('botToggle').checked;
+  const diffSec=document.getElementById('diffSection');
+  const sub=document.getElementById('botSubtitle');
+  const v=parseInt(document.getElementById('diffSlider').value);
+  if(botEnabled){
+    diffSec&&diffSec.classList.add('open');
+    if(sub) sub.textContent=DIFF_CONFIG[v].name+' mode';
+    botDepth=v;
+    updatePlayerDots();
+    maybeRunBot();
+  }else{
+    diffSec&&diffSec.classList.remove('open');
+    if(sub) sub.textContent='Toggle to enable';
+    setBotThinking(false);
+    botTimer&&clearTimeout(botTimer);botTimer=null;
+    updatePlayerDots();
+  }
+}
+
+function maybeRunBot(){
+  if(!botEnabled||G.turn!==botColor) return;
+  if(G.status==='checkmate'||G.status==='stalemate') return;
+
+  setBotThinking(true);
+  updatePlayerDots();
+
+  const v=botDepth||3;
+  const cfg=DIFF_CONFIG[v]||DIFF_CONFIG[3];
+
+  /* setTimeout(0) yields to the browser so the UI repaints
+     the thinking indicator before the synchronous search runs */
+  botTimer=setTimeout(()=>{
+    botTimer=null;
+    if(!botEnabled||G.turn!==botColor){setBotThinking(false);return;}
+
+    let chosen=engBestMove(G, cfg.depth, cfg.noise);
+
+    /* Fallback — random legal move if engine finds nothing */
+    if(!chosen){
+      const all=[];
+      for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+        const p=G.board[r][c]; if(!p) continue;
+        if(botColor==='b'&&isW(p)) continue;
+        if(botColor==='w'&&isB(p)) continue;
+        for(const[tr,tc,type] of getLegal(G,r,c))
+          all.push({fr:r,fc:c,tr,tc,type});
+      }
+      if(all.length) chosen=all[Math.floor(Math.random()*all.length)];
+    }
+
+    setBotThinking(false);
+    if(!chosen){updatePlayerDots();return;}
+
+    const piece=G.board[chosen.fr][chosen.fc];
+    const needsPromo=piece&&piece.toLowerCase()==='p'&&(chosen.tr===0||chosen.tr===7);
+    const promoChar=chosen.promo||(botColor==='b'?'q':'Q');
+    G=applyMove(G,chosen.fr,chosen.fc,chosen.tr,chosen.tc,chosen.type,needsPromo?promoChar:null);
+    renderBoard();
+    updatePlayerDots();
+  }, cfg.delay);
+}
+
+/* ── INIT BOARD — called after all functions defined ── */
+buildBoardDom();
+
+/* ── SCROLL REVEAL ── */
+const obs=new IntersectionObserver((ent)=>{ent.forEach((e,i)=>{if(e.isIntersecting) setTimeout(()=>e.target.classList.add('visible'),i*75)})},{threshold:.08});
+document.querySelectorAll('.timeline-item').forEach(el=>obs.observe(el));
+
+/* ── PIECES ── */
+const pieceData={
+  king:{name:'The King',icon:'♚',desc:'The most important piece — the game is over if it falls. The King moves one square in any direction. While slow in the opening and middlegame, the King becomes a powerful attacking piece in the endgame.',moves:'1 square in any direction · Cannot move into check'},
+  queen:{name:'The Queen',icon:'♛',desc:'The most powerful piece, combining Rook and Bishop movement. Moving any number of squares in any direction, the Queen dominates open positions. Losing her is almost always decisive.',moves:'Any number of squares in any direction'},
+  rook:{name:'The Rook',icon:'♜',desc:'A long-range powerhouse commanding open files and ranks. Rooks are most effective in the endgame and most powerful when doubled. Each player begins with two Rooks.',moves:'Any number of squares horizontally or vertically'},
+  bishop:{name:'The Bishop',icon:'♝',desc:"A long-range diagonal attacker confined to squares of one color. Each player has two Bishops — one light-squared, one dark-squared. The Bishop pair is a strategic advantage in open positions.",moves:'Any number of squares diagonally · Confined to one color throughout the game'},
+  knight:{name:'The Knight',icon:'♞',desc:"The only piece that can jump over others, moving in an L-shape: two squares in one direction, then one square perpendicular. Knights excel in closed positions where Bishops are restricted.",moves:'L-shape: 2+1 squares · Can jump over pieces · 8 possible destinations'},
+  pawn:{name:'The Pawn',icon:'♟',desc:"The soul of chess, in Philidor's words. Pawns move forward but capture diagonally. A pawn reaching the back rank promotes to any piece — almost always a Queen. Pawn structure defines the entire character of a position.",moves:'Forward 1 square (or 2 from start) · Captures diagonally · Promotes on reaching 8th rank'},
+};
+let activePiece=null;
+function togglePiece(key,el){
+  const panel=document.getElementById('piecePanel');
+  const cards=document.querySelectorAll('.piece-card');
+  if(activePiece===key){activePiece=null;panel.classList.remove('open');panel.style.display='none';cards.forEach(c=>c.classList.remove('active'));return}
+  activePiece=key;
+  cards.forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const d=pieceData[key];
+  panel.innerHTML=`<div class="piece-detail-name">${d.icon} <em>${d.name}</em></div><div class="piece-detail-text">${d.desc}</div><div class="piece-detail-moves">↳ ${d.moves}</div>`;
+  panel.classList.add('open');panel.style.display='block';
+}
+
+/* ── RULES ── */
+function toggleRule(el){
+  const was=el.classList.contains('expanded');
+  document.querySelectorAll('.rule-card').forEach(c=>c.classList.remove('expanded'));
+  if(!was) el.classList.add('expanded');
+}
+
+/* ── OPENINGS ── */
+const openings=[
+  {name:'Ruy López (Spanish Game)',eco:'ECO: C60–C99',moves:'1.e4 e5 2.Nf3 Nc6 3.Bb5',detail:'One of the oldest and most classical openings, dating to the 16th century. White pins the knight defending e5, creating enduring pressure. Remains one of the most analyzed openings at grandmaster level.'},
+  {name:'Sicilian Defence',eco:'ECO: B20–B99',moves:'1.e4 c5',detail:'The most popular response to 1.e4. Black immediately fights for the center asymmetrically, leading to rich, unbalanced positions. The weapon of choice for players who want to win with Black.'},
+  {name:"Queen's Gambit",eco:'ECO: D06–D69',moves:'1.d4 d5 2.c4',detail:"White offers a pawn to gain central control. Despite the name, it isn't a true gambit — White can usually recover the pawn. A cornerstone of classical chess."},
+  {name:"King's Indian Defence",eco:'ECO: E60–E99',moves:'1.d4 Nf6 2.c4 g6',detail:"Black allows White to build a strong center, then attacks it. Beloved by dynamic players like Fischer, Kasparov, and Bronstein. Often leads to sharp double-edged battles."},
+  {name:'French Defence',eco:'ECO: C00–C19',moves:'1.e4 e6',detail:"A solid if cramped response to 1.e4. Black prepares to challenge the center with …d5. The French leads to strategic pawn-chain battles rather than sharp tactics."},
+  {name:'Nimzo-Indian Defence',eco:'ECO: E20–E59',moves:'1.d4 Nf6 2.c4 e6 3.Nc3 Bb4',detail:"Black immediately pins the White knight, preventing e4 and potentially damaging White's structure. Named after hypermodern pioneer Aron Nimzowitsch."},
+  {name:'Caro-Kann Defence',eco:'ECO: B10–B19',moves:'1.e4 c6',detail:"A solid answer to 1.e4 — Black prepares …d5 with c6 support, avoiding doubled pawns from the French. Favored by positional players seeking sound endgames."},
+  {name:'English Opening',eco:'ECO: A10–A39',moves:'1.c4',detail:"A hypermodern opening controlling the center from the flank. Very flexible and transposes into many other openings. Popularized by Mikhail Botvinnik."},
+];
+const listEl=document.getElementById('openingsList');
+let activeOp=null;
+openings.forEach((op,idx)=>{
+  const item=document.createElement('div');
+  item.className='opening-item';
+  item.innerHTML=`<div><div class="opening-name">${op.name}</div><div class="opening-eco">${op.eco}</div></div><div class="opening-moves">${op.moves}</div>`;
+  item.addEventListener('click',()=>{
+    if(activeOp===idx){activeOp=null;item.classList.remove('active');listEl.querySelectorAll('.opening-detail').forEach(el=>el.remove());return}
+    activeOp=idx;
+    listEl.querySelectorAll('.opening-item').forEach(el=>el.classList.remove('active'));
+    listEl.querySelectorAll('.opening-detail').forEach(el=>el.remove());
+    item.classList.add('active');
+    const detail=document.createElement('div');
+    detail.className='opening-detail open';
+    detail.innerHTML=`<div class="opening-detail-text"><strong style="color:var(--ivory);font-style:normal">${op.moves}</strong> — ${op.detail}</div>`;
+    item.after(detail);
+  });
+  listEl.appendChild(item);
+});
+
+/* ── QUIZ ── */
+const qs=[
+  {q:'Which piece is the most powerful in chess?',opts:['King','Queen','Rook','Bishop'],ans:1,ex:"The Queen combines Rook and Bishop movement — worth ~9 points, she dominates open positions."},
+  {q:'What happens when a player has no legal moves but is NOT in check?',opts:['Checkmate','Win','Stalemate','Resignation'],ans:2,ex:"Stalemate is a draw — one of chess's most dramatic defensive resources."},
+  {q:'En passant is a special move for which piece?',opts:['Knight','Bishop','Queen','Pawn'],ans:3,ex:"Only pawns can perform en passant — a special capture available only on the very next move after a double pawn advance."},
+  {q:'How many squares does the King travel when castling?',opts:['1','2','3','4'],ans:1,ex:"The King slides exactly two squares toward the rook, which then jumps to the opposite side."},
+  {q:'What ancient Indian game is the ancestor of chess?',opts:['Shatranj','Chaturanga','Go','Shogi'],ans:1,ex:"Chaturanga, ~6th century AD, represented India's four military divisions and is the oldest known ancestor of chess."},
+  {q:"What does 'checkmate' derive from?",opts:["French 'échec mat'","Persian 'Shāh Māt'","Arabic 'al-māt'","Sanskrit 'kshatra'"],ans:1,ex:"'Checkmate' comes from the Persian 'Shāh Māt', meaning 'the king is helpless/dead'. Chess traveled from India through Persia to Europe."},
+  {q:'In which year was the first official World Chess Championship?',opts:['1851','1872','1886','1900'],ans:2,ex:"1886 — Wilhelm Steinitz defeated Zukertort to become the first undisputed World Champion."},
+  {q:'A pawn reaching the back rank must:',opts:['Be removed','Become a King','Promote to any piece except King','Stay as a pawn'],ans:2,ex:"Promotion is mandatory. The pawn must become a Queen, Rook, Bishop, or Knight — almost always a Queen."},
+];
+let qi=0,score=0,answered=false;
+const shuffled=[...qs].sort(()=>Math.random()-.5);
+
+function renderQuiz(){
+  const q=shuffled[qi];
+  document.getElementById('quizProgress').innerHTML=shuffled.map((_,i)=>`<div class="quiz-dot ${i<qi?'done':''}"></div>`).join('');
+  document.getElementById('quizScore').textContent=`Score: ${score} / ${qi}`;
+  document.getElementById('quizQ').textContent=q.q;
+  document.getElementById('quizFeedback').textContent='';
+  document.getElementById('quizNext').style.display='none';
+  const opEl=document.getElementById('quizOpts');opEl.innerHTML='';answered=false;
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');btn.className='quiz-opt';btn.textContent=o;
+    btn.addEventListener('click',()=>{
+      if(answered) return;answered=true;
+      opEl.querySelectorAll('.quiz-opt').forEach((b,bi)=>{b.disabled=true;if(bi===q.ans)b.classList.add('correct');else if(bi===i)b.classList.add('wrong')});
+      if(i===q.ans) score++;
+      document.getElementById('quizFeedback').textContent=(i===q.ans?'✓ Correct! ':'✗ ')+q.ex;
+      document.getElementById('quizScore').textContent=`Score: ${score} / ${qi+1}`;
+      const nb=document.getElementById('quizNext');nb.style.display='inline-block';nb.textContent=qi===shuffled.length-1?'See Results':'Next →';
+    });
+    opEl.appendChild(btn);
+  });
+}
+
+function nextQuestion(){
+  qi++;
+  if(qi>=shuffled.length){
+    document.getElementById('quizQ').textContent=`Quiz Complete! You scored ${score} out of ${shuffled.length}.`;
+    document.getElementById('quizOpts').innerHTML='';
+    document.getElementById('quizFeedback').textContent=score>=6?'Excellent — you truly know your chess!':score>=4?'Good effort — keep studying the game!':'Keep learning — chess rewards patience!';
+    const nb=document.getElementById('quizNext');nb.textContent='Restart';nb.style.display='inline-block';
+    nb.onclick=()=>{qi=0;score=0;shuffled.sort(()=>Math.random()-.5);nb.onclick=nextQuestion;renderQuiz()};
+    document.getElementById('quizProgress').innerHTML=shuffled.map(()=>`<div class="quiz-dot done"></div>`).join('');
+    return;
+  }
+  renderQuiz();
+}
+renderQuiz();
+</script>
+</body>
+</html>
